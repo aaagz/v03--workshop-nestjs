@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { MaintenanceModule } from './maintenance.module';
 import { MaintenanceGuard } from './maintenance.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { TodosModule } from './todos/todos.module';
 
 @Module({
-  imports: [MaintenanceModule],
+  imports: [MaintenanceModule, TodosModule],
   controllers: [AppController],
   providers: [
     AppService,
