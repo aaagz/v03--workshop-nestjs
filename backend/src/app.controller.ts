@@ -10,8 +10,8 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('up')
-  getUpStatus(): string {
+  @Get('health-check')
+  getHealthCheck(): string {
     return 'Server is up';
   }
 }

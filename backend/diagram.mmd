@@ -1,0 +1,23 @@
+graph TD
+    subgraph "User Actions"
+        A[Client sends any request, e.g., GET /health-check]
+        B[Client sends POST /down]
+    end
+
+    subgraph "NestJS Application Logic"
+        C(Global MaintenanceGuard)
+        D(MaintenanceService <br> isEnabled: boolean)
+        E{Is maintenance on?}
+        F[Allow Request to Controller]
+        G[Block Request with 503 Error]
+        H(MaintenanceController)
+    end
+
+    A --> C
+    C -- Asks --> D
+    D -- Returns status --> E
+    E -- No --> F
+    E -- Yes --> G
+
+    B --> H
+    H -- Calls enable() --> D
