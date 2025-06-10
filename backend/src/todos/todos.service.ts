@@ -1,45 +1,45 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { Todo, TodoStatus } from './entities/todo.entity';
-import { v4 as uuid } from 'uuid';
+import { Todo } from './entities/todo.entity';
 
 @Injectable()
 export class TodosService {
-  private todos: Todo[] = [];
+  constructor(
+    @InjectRepository(Todo)
+    private readonly todosRepository: Repository<Todo>,
+  ) {}
 
-  create(createTodoDto: CreateTodoDto): Todo {
-    const { title, description } = createTodoDto;
-    const todo: Todo = {
-      id: uuid(),
-      title,
-      description,
-      status: TodoStatus.OPEN,
-    };
-    this.todos.push(todo);
-    return todo;
+  async create(createTodoDto: CreateTodoDto): Promise<Todo> {
+    const todo = this.todosRepository.create(createTodoDto);
+    return this.todosRepository.save(todo);
   }
 
-  findAll(): Todo[] {
-    return this.todos;
+  async findAll(): Promise<Todo[]> {
+    return this.todosRepository.find();
   }
 
-  findOne(id: string): Todo {
-    const found = this.todos.find((todo) => todo.id === id);
+  async findOne(id: string): Promise<Todo> {
+    const found = await this.todosRepository.findOneBy({ id });
     if (!found) {
       throw new NotFoundException(`Todo with ID "${id}" not found`);
     }
     return found;
   }
 
-  update(id: string, updateTodoDto: UpdateTodoDto): Todo {
-    const todo = this.findOne(id);
-    Object.assign(todo, updateTodoDto);
-    return todo;
+  async update(id: string, updateTodoDto: UpdateTodoDto): Promise<Todo> {
+    const todo = await this.findOne(id);
+    const updatedTodo = Object.assign(todo, updateTodoDto);
+    return this.todosRepository.save(updatedTodo);
   }
 
-  remove(id: string): void {
-    const found = this.findOne(id);
-    this.todos = this.todos.filter((todo) => todo.id !== found.id);
+  async remove(id: string): Promise<void> {
+    const result = await this.todosRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Todo with ID "${id}" not found`);
+    }
   }
 }
+
