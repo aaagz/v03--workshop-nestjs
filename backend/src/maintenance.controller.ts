@@ -1,19 +1,17 @@
-import { Controller, Post } from '@nestjs/common';
-import { MaintenanceService } from './maintenance.service';
+import { Controller, Get } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Controller()
 export class MaintenanceController {
-  constructor(private readonly maintenanceService: MaintenanceService) {}
+  constructor(private readonly configService: ConfigService) {}
 
-  @Post('down')
-  enableMaintenanceMode() {
-    this.maintenanceService.enable();
-    return { message: 'Maintenance mode enabled' };
-  }
-
-  @Post('up')
-  disableMaintenanceMode() {
-    this.maintenanceService.disable();
-    return { message: 'Maintenance mode disabled' };
+  @Get('status')
+  getStatus() {
+    const isMaintenance =
+      this.configService.get<string>('MAINTENANCE_MODE') === 'true';
+    return {
+      status: isMaintenance ? 'maintenance' : 'ok',
+    };
   }
 }
+
