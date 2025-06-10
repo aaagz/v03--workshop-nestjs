@@ -1,0 +1,13 @@
+{
+  "name": "v03-workshop-nestjs-monorepo",
+  "private": true,
+  "scripts": {
+    "dev:backend": "pnpm --filter @v03-workshop/backend start:dev",
+    "build:backend": "pnpm --filter @v03-workshop/backend build",
+    "dev:frontend": "pnpm --filter @v03-workshop/frontend dev",
+    "build:frontend": "pnpm --filter @v03-workshop/frontend build"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}
