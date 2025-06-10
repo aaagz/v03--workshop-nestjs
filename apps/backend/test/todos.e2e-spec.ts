@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Todo } from './../src/todos/entities/todo.entity';
+import { TodoEntity } from './../src/todos/entities/todo.entity';
 
 describe('TodosController (e2e)', () => {
   let app: INestApplication;
-  let repository: Repository<Todo>;
+  let repository: Repository<TodoEntity>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -19,7 +19,9 @@ describe('TodosController (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
-    repository = moduleFixture.get<Repository<Todo>>(getRepositoryToken(Todo));
+    repository = moduleFixture.get<Repository<TodoEntity>>(
+      getRepositoryToken(TodoEntity),
+    );
   });
 
   beforeEach(async () => {

@@ -1,3 +1,4 @@
+export * from '@v03-workshop/shared';
 import { Todo, TodoStatus } from '@v03-workshop/shared';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 

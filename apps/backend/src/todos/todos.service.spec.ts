@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { TodosService } from './todos.service';
-import { Todo, TodoStatus } from './entities/todo.entity';
+import { TodoEntity, TodoStatus } from './entities/todo.entity';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 
@@ -18,21 +18,23 @@ const mockRepository = () => ({
 
 describe('TodosService', () => {
   let service: TodosService;
-  let repository: Repository<Todo>;
+  let repository: Repository<TodoEntity>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TodosService,
         {
-          provide: getRepositoryToken(Todo),
+          provide: getRepositoryToken(TodoEntity),
           useFactory: mockRepository,
         },
       ],
     }).compile();
 
     service = module.get<TodosService>(TodosService);
-    repository = module.get<Repository<Todo>>(getRepositoryToken(Todo));
+    repository = module.get<Repository<TodoEntity>>(
+      getRepositoryToken(TodoEntity),
+    );
   });
 
   it('should be defined', () => {
@@ -45,10 +47,11 @@ describe('TodosService', () => {
         title: 'Test Todo',
         description: 'Test Description',
       };
-      const todo = {
+      const todo: TodoEntity = {
         id: 'some-uuid',
+        title: 'Test Todo',
+        description: 'Test Description',
         status: TodoStatus.OPEN,
-        ...createTodoDto,
       };
 
       (repository.create as jest.Mock).mockReturnValue(todo);
@@ -63,7 +66,7 @@ describe('TodosService', () => {
 
   describe('findAll', () => {
     it('should return an array of todos', async () => {
-      const todos = [
+      const todos: TodoEntity[] = [
         {
           id: '1',
           title: 'Test',
@@ -81,7 +84,7 @@ describe('TodosService', () => {
 
   describe('findOne', () => {
     it('should return a single todo if found', async () => {
-      const todo = {
+      const todo: TodoEntity = {
         id: '1',
         title: 'Test',
         description: 'Desc',
@@ -102,8 +105,8 @@ describe('TodosService', () => {
 
   describe('update', () => {
     it('should update and return the todo', async () => {
-      const updateTodoDto = { title: 'Updated Title' } as UpdateTodoDto;
-      const existingTodo = {
+      const updateTodoDto: UpdateTodoDto = { title: 'Updated Title' };
+      const existingTodo: TodoEntity = {
         id: '1',
         title: 'Old Title',
         description: 'Desc',
