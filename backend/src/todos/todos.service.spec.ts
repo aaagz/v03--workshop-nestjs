@@ -83,7 +83,7 @@ describe('TodosService', () => {
 
   describe('update', () => {
     it('should update and return the todo', async () => {
-      const updateTodoDto: UpdateTodoDto = { title: 'Updated Title' };
+      const updateTodoDto = { title: 'Updated Title' } as UpdateTodoDto;
       const existingTodo = { id: '1', title: 'Old Title', description: 'Desc', status: TodoStatus.OPEN };
       const updatedTodo = { ...existingTodo, ...updateTodoDto };
 
