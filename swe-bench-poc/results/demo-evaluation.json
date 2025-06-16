@@ -1,0 +1,105 @@
+{
+  "summary": {
+    "total_problems": 3,
+    "successful_solutions": 3,
+    "failed_solutions": 0,
+    "success_rate": "100.00%",
+    "average_time_ms": 1560
+  },
+  "error_analysis": {},
+  "detailed_results": [
+    {
+      "problem_id": "div-by-zero-001",
+      "success": true,
+      "error": null,
+      "analysis": "\nANALYSIS: The function has a division by zero issue when the input list is empty. When len(numbers) is 0, the division operation will raise a ZeroDivisionError.\n\nFIXED_CODE:\n```python\ndef calculate_average(numbers):\n    if not numbers:\n        raise ValueError(\"Cannot calculate average of empty list\")\n    return sum(numbers) / len(numbers)\n```\n\nEXPLANATION: Added a check for empty input list and raise an appropriate ValueError with a descriptive message. This prevents the ZeroDivisionError and provides clear feedback to the user.\n",
+      "generated_fix": "def calculate_average(numbers):\n    if not numbers:\n        raise ValueError(\"Cannot calculate average of empty list\")\n    return sum(numbers) / len(numbers)",
+      "patch": "--- a/math_utils.py\n+++ b/math_utils.py\n@@ -2,1 +2,3 @@\n-    return sum(numbers) / len(numbers)\n+    if not numbers:\n",
+      "test_results": [
+        {
+          "test_id": 0,
+          "test_case": "result = calculate_average([1, 2, 3, 4, 5])\nassert result == 3.0",
+          "passed": true,
+          "output": "TEST_PASSED\n",
+          "error": null
+        },
+        {
+          "test_id": 1,
+          "test_case": "try:\n    calculate_average([])\nexcept (ValueError, ZeroDivisionError):\n    pass\nelse:\n    assert False, 'Should raise exception for empty list'",
+          "passed": true,
+          "output": "TEST_PASSED\n",
+          "error": null
+        }
+      ],
+      "execution_time": 1554,
+      "timestamp": "2025-06-16T11:40:18.291Z"
+    },
+    {
+      "problem_id": "null-check-002",
+      "success": true,
+      "error": null,
+      "analysis": "\nANALYSIS: The function crashes when None is passed as input because None doesn't have string methods like .lower() and .replace().\n\nFIXED_CODE:\n```python\ndef is_palindrome(text):\n    if text is None:\n        return False\n    cleaned = text.lower().replace(' ', '')\n    return cleaned == cleaned[::-1]\n```\n\nEXPLANATION: Added a None check at the beginning of the function. If text is None, return False immediately. This prevents AttributeError when trying to call string methods on None.\n",
+      "generated_fix": "def is_palindrome(text):\n    if text is None:\n        return False\n    cleaned = text.lower().replace(' ', '')\n    return cleaned == cleaned[::-1]",
+      "patch": "--- a/string_utils.py\n+++ b/string_utils.py\n@@ -2,2 +2,4 @@\n-    cleaned = text.lower().replace(' ', '')\n+    if text is None:\n",
+      "test_results": [
+        {
+          "test_id": 0,
+          "test_case": "assert is_palindrome('racecar') == True",
+          "passed": true,
+          "output": "TEST_PASSED\n",
+          "error": null
+        },
+        {
+          "test_id": 1,
+          "test_case": "assert is_palindrome('hello') == False",
+          "passed": true,
+          "output": "TEST_PASSED\n",
+          "error": null
+        },
+        {
+          "test_id": 2,
+          "test_case": "assert is_palindrome(None) == False",
+          "passed": true,
+          "output": "TEST_PASSED\n",
+          "error": null
+        }
+      ],
+      "execution_time": 1564,
+      "timestamp": "2025-06-16T11:40:19.845Z"
+    },
+    {
+      "problem_id": "list-bounds-003",
+      "success": true,
+      "error": null,
+      "analysis": "\nANALYSIS: The function will raise an IndexError when the index is out of bounds (negative or >= list length).\n\nFIXED_CODE:\n```python\ndef get_element(lst, index):\n    try:\n        return lst[index]\n    except IndexError:\n        return None\n```\n\nEXPLANATION: Wrapped the list access in a try-except block to catch IndexError exceptions and return None for invalid indices instead of crashing.\n",
+      "generated_fix": "def get_element(lst, index):\n    try:\n        return lst[index]\n    except IndexError:\n        return None",
+      "patch": "--- a/list_utils.py\n+++ b/list_utils.py\n@@ -2,1 +2,4 @@\n-    return lst[index]\n+    try:\n",
+      "test_results": [
+        {
+          "test_id": 0,
+          "test_case": "assert get_element([1, 2, 3], 1) == 2",
+          "passed": true,
+          "output": "TEST_PASSED\n",
+          "error": null
+        },
+        {
+          "test_id": 1,
+          "test_case": "assert get_element([1, 2, 3], 10) is None",
+          "passed": true,
+          "output": "TEST_PASSED\n",
+          "error": null
+        },
+        {
+          "test_id": 2,
+          "test_case": "assert get_element([1, 2, 3], -10) is None",
+          "passed": true,
+          "output": "TEST_PASSED\n",
+          "error": null
+        }
+      ],
+      "execution_time": 1562,
+      "timestamp": "2025-06-16T11:40:21.409Z"
+    }
+  ],
+  "generated_at": "2025-06-16T11:40:22.971Z"
+}

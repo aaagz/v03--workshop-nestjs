@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "count": 5,
+    "created_at": "2024-01-15T10:00:00Z",
+    "version": "1.0.0",
+    "description": "Basic SWE-bench style problems for PoC testing"
+  },
+  "tasks": [
+    {
+      "id": "div-by-zero-001",
+      "repo": "example/math-utils",
+      "problem_statement": "Fix the division by zero error in the calculate_average function. The function should handle empty lists gracefully by returning 0 or raising an appropriate exception.",
+      "base_code": "def calculate_average(numbers):\n    return sum(numbers) / len(numbers)",
+      "filename": "math_utils.py",
+      "test_cases": [
+        "result = calculate_average([1, 2, 3, 4, 5])\nassert result == 3.0",
+        "try:\n    calculate_average([])\nexcept (ValueError, ZeroDivisionError):\n    pass\nelse:\n    assert False, 'Should raise exception for empty list'"
+      ],
+      "difficulty": "easy",
+      "tags": ["division", "error-handling", "edge-case"]
+    },
+    {
+      "id": "null-check-002", 
+      "repo": "example/string-utils",
+      "problem_statement": "Fix the is_palindrome function to handle None input correctly. Currently it crashes when None is passed as input.",
+      "base_code": "def is_palindrome(text):\n    cleaned = text.lower().replace(' ', '')\n    return cleaned == cleaned[::-1]",
+      "filename": "string_utils.py",
+      "test_cases": [
+        "assert is_palindrome('racecar') == True",
+        "assert is_palindrome('hello') == False",
+        "assert is_palindrome(None) == False"
+      ],
+      "difficulty": "easy",
+      "tags": ["null-check", "string-processing", "edge-case"]
+    },
+    {
+      "id": "list-bounds-003",
+      "repo": "example/data-structures", 
+      "problem_statement": "Fix the get_element function to handle index out of bounds errors. It should return None for invalid indices instead of crashing.",
+      "base_code": "def get_element(lst, index):\n    return lst[index]",
+      "filename": "list_utils.py",
+      "test_cases": [
+        "assert get_element([1, 2, 3], 1) == 2",
+        "assert get_element([1, 2, 3], 10) is None",
+        "assert get_element([1, 2, 3], -10) is None"
+      ],
+      "difficulty": "easy",
+      "tags": ["bounds-checking", "list-operations", "error-handling"]
+    },
+    {
+      "id": "type-validation-004",
+      "repo": "example/validators",
+      "problem_statement": "Fix the calculate_factorial function to handle negative numbers and non-integer inputs properly. It should return None for invalid inputs.",
+      "base_code": "def calculate_factorial(n):\n    if n == 0:\n        return 1\n    return n * calculate_factorial(n - 1)",
+      "filename": "math_functions.py", 
+      "test_cases": [
+        "assert calculate_factorial(5) == 120",
+        "assert calculate_factorial(0) == 1",
+        "assert calculate_factorial(-1) is None",
+        "assert calculate_factorial(3.5) is None"
+      ],
+      "difficulty": "medium",
+      "tags": ["recursion", "input-validation", "type-checking"]
+    },
+    {
+      "id": "dict-key-005",
+      "repo": "example/data-processing",
+      "problem_statement": "Fix the safe_get_nested function to handle missing keys in nested dictionaries without crashing. It should return a default value when keys don't exist.",
+      "base_code": "def safe_get_nested(data, keys, default=None):\n    result = data\n    for key in keys:\n        result = result[key]\n    return result",
+      "filename": "dict_utils.py",
+      "test_cases": [
+        "data = {'a': {'b': {'c': 42}}}\nassert safe_get_nested(data, ['a', 'b', 'c']) == 42",
+        "data = {'a': {'b': {}}}\nassert safe_get_nested(data, ['a', 'b', 'missing'], 'default') == 'default'",
+        "data = {}\nassert safe_get_nested(data, ['missing'], None) is None"
+      ],
+      "difficulty": "medium", 
+      "tags": ["dictionaries", "nested-access", "error-handling"]
+    }
+  ]
+}
