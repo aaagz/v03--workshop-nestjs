@@ -1,38 +1,65 @@
-# SWE-bench PoC with Ollama API
+# SWE-bench PoC with Multi-Provider LLM Support
 
-A simplified proof-of-concept implementation of the SWE-bench evaluation framework using local Ollama API with Qwen 2.5-8B model.
+A comprehensive **Proof of Concept (PoC)** implementation of the SWE-bench evaluation framework supporting **multiple LLM providers**: Ollama (local), OpenAI, Google Gemini, and Anthropic Claude.
 
-## Overview
+## 🎯 Overview
 
-This project demonstrates the core concepts of SWE-bench:
+This project demonstrates the core concepts of SWE-bench with support for multiple LLM providers:
 - Loading real-world software engineering problems
-- Using LLMs to analyze and fix code issues  
+- Using different LLMs to analyze and fix code issues  
 - Applying generated patches and validating solutions
+- Comparing performance across different providers
 - Generating comprehensive evaluation reports
 
-## Prerequisites
+## 🤖 Supported Providers
 
-### 1. Install Ollama
+| Provider | Description | Models | Setup Required |
+|----------|-------------|---------|----------------|
+| **Ollama** | Local LLM server | Qwen 2.5, CodeLlama, DeepSeek Coder | Install Ollama locally |
+| **OpenAI** | OpenAI GPT models | GPT-4, GPT-4 Turbo, GPT-3.5 Turbo | API Key required |
+| **Gemini** | Google AI models | Gemini Pro, Gemini 1.5 Pro/Flash | API Key required |
+| **Claude** | Anthropic AI models | Claude 3 Sonnet/Opus/Haiku | API Key required |
+
+## 📋 Prerequisites
+
+### 1. System Requirements
+- Node.js 18+
+- Python 3.8+ (for syntax validation and test execution)
+- Internet connection (for API-based providers)
+
+### 2. Provider Setup
+
+#### Ollama (Local)
 ```bash
-# Download and install from https://ollama.ai
+# Install Ollama
 curl -fsSL https://ollama.ai/install.sh | sh
 
 # Start Ollama daemon
 ollama serve
-```
 
-### 2. Pull Qwen 2.5-8B Model
-```bash
+# Pull a model
 ollama pull qwen:2.5-8b
 ```
 
-### 3. System Requirements
-- Node.js 18+
-- Python 3.8+ (for syntax validation and test execution)
-- ~8GB RAM available for Ollama model
-- Internet connection (for initial model download)
+#### OpenAI
+```bash
+# Set API key
+export OPENAI_API_KEY="your-api-key-here"
+```
 
-## Quick Start
+#### Google Gemini
+```bash
+# Get API key from https://ai.google.dev
+export GEMINI_API_KEY="your-api-key-here"
+```
+
+#### Anthropic Claude
+```bash
+# Get API key from https://console.anthropic.com
+export ANTHROPIC_API_KEY="your-api-key-here"
+```
+
+## 🚀 Quick Start
 
 ### 1. Setup Project
 ```bash
@@ -41,30 +68,57 @@ npm install
 npm run setup  # Creates results directory
 ```
 
-### 2. Test Connection
+### 2. List Available Providers
 ```bash
-node main.js test-connection
+node main.js list-providers
 ```
 
-### 3. Run Sample Evaluation
+### 3. Test Provider Connections
 ```bash
-# Evaluate predefined sample problems
-node main.js batch samples/basic-problems.json --limit 3
+# Test Ollama (local)
+node main.js test-connection --provider ollama
 
-# Evaluate single problem
-node main.js evaluate samples/basic-problems.json
+# Test OpenAI
+node main.js test-connection --provider openai
+
+# Test Gemini
+node main.js test-connection --provider gemini --model gemini-1.5-pro
+
+# Test Claude
+node main.js test-connection --provider claude
 ```
 
-## Usage Guide
+### 4. Run Evaluations
+```bash
+# Single problem with different providers
+node main.js evaluate samples/basic-problems.json --provider ollama
+node main.js evaluate samples/basic-problems.json --provider openai --model gpt-4
+node main.js evaluate samples/basic-problems.json --provider gemini
+
+# Batch evaluation
+node main.js batch samples/basic-problems.json --provider claude --limit 3
+
+# Compare providers
+node main.js compare samples/basic-problems.json --providers "ollama,openai,gemini"
+```
+
+## 📖 Usage Guide
 
 ### Commands
 
-#### Test Ollama Connection
+#### List Providers and Models
+```bash
+node main.js list-providers
+```
+Shows all supported providers, their models, setup status, and usage examples.
+
+#### Test Provider Connection
 ```bash
 node main.js test-connection [options]
 
 Options:
-  -m, --model <model>  Ollama model to use (default: qwen:2.5-8b)
+  -p, --provider <provider>  LLM provider (ollama, openai, gemini, claude)
+  -m, --model <model>        Model to use (auto-detected if not specified)
 ```
 
 #### Evaluate Single Problem  
@@ -72,12 +126,13 @@ Options:
 node main.js evaluate <problem-file> [options]
 
 Arguments:
-  problem-file         Path to problem JSON file
+  problem-file               Path to problem JSON file
 
 Options:
-  -m, --model <model>  Ollama model to use (default: qwen:2.5-8b)
-  -o, --output <file>  Output report file (default: results/single-evaluation.json)
-  --timeout <ms>       Request timeout in milliseconds (default: 60000)
+  -p, --provider <provider>  LLM provider (default: ollama)
+  -m, --model <model>        Model to use (auto-detected from provider)
+  -o, --output <file>        Output report file
+  --timeout <ms>             Request timeout in milliseconds
 ```
 
 #### Batch Evaluation
@@ -85,186 +140,243 @@ Options:
 node main.js batch <batch-file> [options]
 
 Arguments:
-  batch-file           Path to batch JSON file
+  batch-file                 Path to batch JSON file
 
 Options:
-  -m, --model <model>  Ollama model to use (default: qwen:2.5-8b)
-  -o, --output <file>  Output report file (default: results/batch-evaluation.json)
-  --timeout <ms>       Request timeout in milliseconds (default: 60000)
-  --limit <n>          Limit number of problems to evaluate
+  -p, --provider <provider>  LLM provider (default: ollama)
+  -m, --model <model>        Model to use (auto-detected from provider)
+  -o, --output <file>        Output report file
+  --timeout <ms>             Request timeout in milliseconds
+  --limit <n>                Limit number of problems to evaluate
 ```
 
-#### Create Sample Problems
+#### Compare Providers
 ```bash
-node main.js create-samples [options]
+node main.js compare <batch-file> [options]
+
+Arguments:
+  batch-file                 Path to batch JSON file
 
 Options:
-  -o, --output <dir>   Output directory (default: samples)
+  -p, --providers <list>     Comma-separated list of providers to compare
+  --limit <n>                Limit number of problems to evaluate
+  -o, --output <file>        Output comparison report
 ```
 
 ### Example Workflows
 
-#### Basic Evaluation
+#### Basic Provider Testing
 ```bash
-# 1. Test connection
-node main.js test-connection
-
-# 2. Evaluate sample problems (limit to 2 for quick test)
-node main.js batch samples/basic-problems.json --limit 2 -o results/test-run.json
-
-# 3. View results
-cat results/test-run.json
+# Test all available providers
+node main.js test-connection --provider ollama
+node main.js test-connection --provider openai
+node main.js test-connection --provider gemini
+node main.js test-connection --provider claude
 ```
 
-#### Custom Problem Evaluation
+#### Single Problem Evaluation with Different Models
 ```bash
-# 1. Create custom problem file
-cat > my-problem.json << 'EOF'
-{
-  "id": "custom-001",
-  "repo": "my-repo/utils",
-  "problem_statement": "Fix the function to handle None inputs",
-  "base_code": "def process(data):\n    return data.strip()",
-  "filename": "utils.py",
-  "test_cases": [
-    "assert process('  hello  ') == 'hello'",
-    "assert process(None) is None"
-  ]
-}
-EOF
+# Using Ollama with different models
+node main.js evaluate problem.json --provider ollama --model qwen:2.5-8b
+node main.js evaluate problem.json --provider ollama --model codellama:13b
 
-# 2. Evaluate custom problem
-node main.js evaluate my-problem.json -o results/custom-result.json
+# Using OpenAI with different models
+node main.js evaluate problem.json --provider openai --model gpt-4
+node main.js evaluate problem.json --provider openai --model gpt-3.5-turbo
+
+# Using Gemini
+node main.js evaluate problem.json --provider gemini --model gemini-1.5-pro
 ```
 
-## Problem Format
+#### Provider Performance Comparison
+```bash
+# Compare multiple providers on same problem set
+node main.js compare samples/basic-problems.json \
+  --providers "ollama,openai,gemini,claude" \
+  --limit 5 \
+  -o results/provider-comparison.json
 
-### Single Problem Structure
-```json
-{
-  "id": "unique-problem-id",
-  "repo": "repository/name", 
-  "problem_statement": "Description of the issue to fix",
-  "base_code": "def buggy_function():\n    # code with issue",
-  "filename": "file.py",
-  "test_cases": [
-    "assert buggy_function() == expected_result"
-  ],
-  "difficulty": "easy|medium|hard",
-  "tags": ["tag1", "tag2"]
-}
+# View comparison results
+cat results/provider-comparison.json | jq '.comparison_summary'
 ```
 
-### Batch File Structure
+#### Batch Processing with Different Providers
+```bash
+# Process problems with Ollama (local, free)
+node main.js batch samples/basic-problems.json --provider ollama --limit 5
+
+# Process with OpenAI (cloud, paid)
+node main.js batch samples/basic-problems.json --provider openai --limit 3
+
+# Process with Claude (cloud, paid)  
+node main.js batch samples/basic-problems.json --provider claude --limit 3
+```
+
+## 🛠️ Configuration
+
+### Environment Variables
+
+```bash
+# Required for API-based providers
+export OPENAI_API_KEY="sk-..."           # OpenAI API key
+export GEMINI_API_KEY="AI..."            # Google AI Studio API key  
+export ANTHROPIC_API_KEY="sk-ant-..."    # Anthropic API key
+
+# Optional configurations
+export OLLAMA_HOST="localhost"           # Ollama server host
+export OLLAMA_PORT="11434"               # Ollama server port
+```
+
+### Model Selection
+
+Each provider has a default model, but you can specify others:
+
+```bash
+# Ollama models (local)
+--model qwen:2.5-8b           # Default, good balance
+--model qwen:2.5-14b          # Larger, more capable
+--model codellama:13b         # Code-focused
+--model deepseek-coder:6.7b   # Fast code model
+
+# OpenAI models
+--model gpt-4                 # Default, most capable
+--model gpt-4-turbo           # Faster, cheaper
+--model gpt-3.5-turbo         # Fastest, cheapest
+
+# Gemini models  
+--model gemini-pro            # Default
+--model gemini-1.5-pro        # Latest, most capable
+--model gemini-1.5-flash      # Faster, cheaper
+
+# Claude models
+--model claude-3-sonnet-20240229    # Default, balanced
+--model claude-3-opus-20240229      # Most capable
+--model claude-3-haiku-20240307     # Fastest
+```
+
+## 📊 Output Examples
+
+### Provider Comparison Report
 ```json
 {
   "metadata": {
-    "count": 5,
-    "version": "1.0.0"
+    "providers": ["ollama", "openai", "gemini"],
+    "total_problems": 3,
+    "timestamp": "2024-01-15T10:30:00Z"
   },
-  "tasks": [
-    { "id": "problem-1", ... },
-    { "id": "problem-2", ... }
-  ]
-}
-```
-
-## Output Format
-
-### Evaluation Report Structure
-```json
-{
-  "summary": {
-    "total_problems": 5,
-    "successful_solutions": 3,
-    "failed_solutions": 2, 
-    "success_rate": "60.0%",
-    "average_time_ms": 15000
-  },
-  "error_analysis": {
-    "Syntax Error": 1,
-    "Timeout": 1
-  },
-  "detailed_results": [
-    {
-      "problem_id": "div-by-zero-001",
-      "success": true,
-      "analysis": "ANALYSIS: The function has a division by zero issue...",
-      "generated_fix": "def calculate_average(numbers):\n    if not numbers:\n        raise ValueError('Empty list')\n    return sum(numbers) / len(numbers)",
-      "patch": "--- a/math_utils.py\n+++ b/math_utils.py\n@@ -1,2 +1,4 @@\n def calculate_average(numbers):\n+    if not numbers:\n+        raise ValueError('Empty list')\n     return sum(numbers) / len(numbers)",
-      "test_results": [
-        {"test_id": 0, "passed": true, "test_case": "..."},
-        {"test_id": 1, "passed": true, "test_case": "..."}
-      ],
-      "execution_time": 12000,
-      "timestamp": "2024-01-15T10:30:00Z"
+  "provider_results": {
+    "ollama": {
+      "summary": {
+        "success_rate": "66.7%",
+        "average_time_ms": 2500
+      }
+    },
+    "openai": {
+      "summary": {
+        "success_rate": "100.0%", 
+        "average_time_ms": 1800
+      }
+    },
+    "gemini": {
+      "summary": {
+        "success_rate": "100.0%",
+        "average_time_ms": 2100
+      }
     }
-  ]
+  },
+  "comparison_summary": {
+    "best_performer": "openai",
+    "performance_ranking": [
+      {"provider": "openai", "success_rate": "100.0%"},
+      {"provider": "gemini", "success_rate": "100.0%"},
+      {"provider": "ollama", "success_rate": "66.7%"}
+    ],
+    "average_success_rate": "88.9%"
+  }
 }
 ```
 
-## Architecture
+## 🎯 Performance Considerations
 
-### Core Components
+### Provider Characteristics
 
-1. **OllamaAgent** (`lib/ollama-agent.js`)
-   - HTTP client for Ollama API
-   - Prompt engineering for code analysis
-   - Response parsing and error handling
+| Provider | Speed | Cost | Quality | Privacy | Offline |
+|----------|-------|------|---------|---------|---------|
+| **Ollama** | Medium | Free | Good | 100% | ✅ |
+| **OpenAI** | Fast | $$ | Excellent | Cloud | ❌ |
+| **Gemini** | Fast | $ | Very Good | Cloud | ❌ |
+| **Claude** | Medium | $$ | Excellent | Cloud | ❌ |
 
-2. **ProblemLoader** (`lib/problem-loader.js`)
-   - JSON problem file parsing
-   - Validation and statistics
-   - Batch processing support
+### Recommendations
 
-3. **Evaluator** (`lib/evaluator.js`)
-   - End-to-end problem evaluation
-   - Code syntax validation
-   - Test case execution
-   - Report generation
+- **Development/Testing**: Use Ollama for free, local development
+- **Production/Research**: Use OpenAI GPT-4 or Claude for best results
+- **Budget-Conscious**: Use Gemini Flash or OpenAI GPT-3.5 Turbo
+- **Privacy-Sensitive**: Use Ollama exclusively (local processing)
 
-### Evaluation Workflow
+## 🚀 Advanced Usage
 
+### Custom Agent Configuration
+```javascript
+// Using the agent factory directly
+const AgentFactory = require('./lib/agent-factory');
+
+// Create agents with custom options
+const ollamaAgent = AgentFactory.createAgent('ollama', {
+  model: 'codellama:13b',
+  timeout: 120000
+});
+
+const openaiAgent = AgentFactory.createAgent('openai', {
+  model: 'gpt-4-turbo',
+  apiKey: 'custom-key',
+  timeout: 30000
+});
 ```
-Problem Loading → Code Analysis → Patch Generation → Syntax Validation → Test Execution → Result Recording
-```
 
-## Limitations (PoC Scope)
-
-- **Simplified Environment**: No Docker containerization
-- **Basic Tests**: Simple assertion-based test cases only  
-- **Python Only**: Limited to Python code examples
-- **Local Execution**: No sandboxing or security isolation
-- **Limited Metrics**: Basic success/failure tracking
-
-## Performance Tips
-
-### Ollama Optimization
+### Batch Provider Testing
 ```bash
-# Increase context window for complex problems
-export OLLAMA_NUM_CTX=8192
-
-# Use GPU acceleration if available
-export OLLAMA_GPU=1
-
-# Adjust model parameters
-export OLLAMA_TEMPERATURE=0.1
+# Test all providers and save results
+for provider in ollama openai gemini claude; do
+  echo "Testing $provider..."
+  node main.js test-connection --provider $provider > "test-$provider.log" 2>&1
+done
 ```
 
-### Batch Processing
+### Automated Benchmarking
 ```bash
-# Process problems in smaller batches to avoid timeouts
-node main.js batch problems.json --limit 10
-
-# Increase timeout for complex problems
-node main.js batch problems.json --timeout 120000
+# Run comprehensive comparison
+node main.js compare samples/basic-problems.json \
+  --providers "ollama,openai,gemini,claude" \
+  --limit 10 \
+  -o "benchmark-$(date +%Y%m%d).json"
 ```
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 ### Common Issues
 
-#### Ollama Connection Failed
+#### Provider Not Available
+```bash
+# Check provider status
+node main.js list-providers
+
+# Test specific provider
+node main.js test-connection --provider openai
+```
+
+#### API Key Issues
+```bash
+# Verify environment variables
+echo $OPENAI_API_KEY
+echo $GEMINI_API_KEY
+echo $ANTHROPIC_API_KEY
+
+# Test with explicit model
+node main.js test-connection --provider openai --model gpt-3.5-turbo
+```
+
+#### Ollama Connection Issues
 ```bash
 # Check if Ollama is running
 curl http://localhost:11434/api/version
@@ -272,89 +384,28 @@ curl http://localhost:11434/api/version
 # Start Ollama daemon
 ollama serve
 
-# Verify model is available
-ollama list
-```
-
-#### Model Not Found
-```bash
-# Pull the required model
+# Pull required model
 ollama pull qwen:2.5-8b
-
-# Check available models
-ollama list
 ```
 
-#### Syntax Validation Errors
-```bash
-# Ensure Python 3 is available
-python3 --version
+### Error Messages
 
-# Install required Python packages if needed
-pip3 install ast
-```
+- **"Missing environment variables"**: Set required API keys
+- **"Cannot connect to provider"**: Check network/service status
+- **"Invalid model for provider"**: Use `list-providers` to see available models
+- **"Request timeout"**: Increase timeout or try smaller problems
 
-#### Test Execution Failures
-- Check `/tmp` directory permissions
-- Verify Python path is correct
-- Review test case syntax in problem definitions
+## 🔮 Future Enhancements
 
-### Performance Issues
+- Support for more providers (Hugging Face, Cohere, etc.)
+- Advanced prompt engineering per provider
+- Cost tracking and optimization
+- Parallel provider evaluation
+- Web interface for provider management
+- Integration with continuous integration systems
 
-#### Slow Response Times
-- Reduce batch size with `--limit`
-- Increase timeout with `--timeout`
-- Use a more powerful model or hardware
+## 📝 Conclusion
 
-#### Memory Issues
-- Close other applications
-- Reduce Ollama context window
-- Process problems sequentially instead of in batch
+This enhanced SWE-bench PoC demonstrates that multiple LLM providers can be seamlessly integrated for automated code fixing tasks. The modular architecture allows for easy comparison of different models and providers, enabling researchers and practitioners to choose the best option for their specific needs, whether prioritizing cost, performance, privacy, or offline capability.
 
-## Extending the PoC
-
-### Adding New Models
-```javascript
-// In lib/ollama-agent.js
-const agent = new OllamaAgent({
-  model: 'codellama:13b',  // or other code-focused models
-  timeout: 90000
-});
-```
-
-### Custom Prompt Templates
-```javascript
-// Create prompts/custom-analyze.txt
-const customPrompt = `
-You are an expert software engineer...
-[custom prompt content]
-`;
-```
-
-### Additional Languages
-```javascript
-// Extend evaluator for other languages
-async validateSyntax(code, language = 'python') {
-  switch(language) {
-    case 'javascript':
-      return await this.validateJavaScript(code);
-    case 'python':
-      return await this.validatePython(code);
-    // Add more languages
-  }
-}
-```
-
-## Contributing
-
-This is a proof-of-concept project. To extend functionality:
-
-1. Fork the repository
-2. Create feature branches
-3. Add comprehensive tests
-4. Update documentation
-5. Submit pull requests
-
-## License
-
-MIT License - see LICENSE file for details.
+The project serves as a comprehensive foundation for AI-assisted software engineering research and development across multiple LLM ecosystems.
